@@ -1,39 +1,36 @@
 import { useState, useEffect } from "react";
 import type { Route } from "./+types/note";
 import { Link, useParams } from "react-router";
-import { getNotes } from "./notes";
+import { useNotes } from "../store/notes-store";
 
 export function meta({ params }: Route.MetaArgs) {
-  const notes = getNotes();
-  const note = notes.find((n) => n.id === params.id);
   return [
-    { title: note ? `${note.title} - Notes App` : "Note Not Found" },
-    { name: "description", content: note?.content || "View your note" },
+    { title: "View Note - Notes App" },
+    { name: "description", content: "View your note" },
   ];
 }
 
 export default function Note() {
   const { id } = useParams();
-  const [note, setNote] = useState<any>(null);
+  const { getNote, updateNote } = useNotes();
+  const note = getNote(id!);
   const [isEditing, setIsEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState("");
-  const [editContent, setEditContent] = useState("");
+  const [editTitle, setEditTitle] = useState(note?.title || "");
+  const [editContent, setEditContent] = useState(note?.content || "");
 
   useEffect(() => {
-    const notes = getNotes();
-    const foundNote = notes.find((n) => n.id === id);
-    setNote(foundNote);
-    if (foundNote) {
-      setEditTitle(foundNote.title);
-      setEditContent(foundNote.content);
+    if (note) {
+      setEditTitle(note.title);
+      setEditContent(note.content);
     }
-  }, [id]);
+  }, [note]);
 
   const handleSave = () => {
-    if (note) {
-      note.title = editTitle;
-      note.content = editContent;
-      setNote({ ...note });
+    if (note && id) {
+      updateNote(id, {
+        title: editTitle,
+        content: editContent,
+      });
       setIsEditing(false);
     }
   };

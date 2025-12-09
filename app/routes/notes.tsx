@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Route } from "./+types/notes";
 import { Link, useNavigate } from "react-router";
+import { useNotes } from "../store/notes-store";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -9,49 +10,8 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-// In-memory notes storage (in a real app, this would be in a database)
-const initialNotes = [
-  {
-    id: "1",
-    title: "Welcome Note",
-    content: "This is your first note! Click to view and edit.",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    title: "Shopping List",
-    content: "Milk, Eggs, Bread, Coffee",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "3",
-    title: "Ideas",
-    content: "Build a notes app with React Router",
-    createdAt: new Date().toISOString(),
-  },
-];
-
-let notesStore = [...initialNotes];
-
-export function getNotes() {
-  return notesStore;
-}
-
-export function addNote(note: {
-  id: string;
-  title: string;
-  content: string;
-  createdAt: string;
-}) {
-  notesStore.unshift(note);
-}
-
-export function deleteNote(id: string) {
-  notesStore = notesStore.filter((note) => note.id !== id);
-}
-
 export default function Notes() {
-  const [notes, setNotes] = useState(getNotes());
+  const { notes, addNote, deleteNote } = useNotes();
   const [showNewNote, setShowNewNote] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
@@ -66,7 +26,6 @@ export default function Notes() {
         createdAt: new Date().toISOString(),
       };
       addNote(note);
-      setNotes(getNotes());
       setNewTitle("");
       setNewContent("");
       setShowNewNote(false);
@@ -76,7 +35,6 @@ export default function Notes() {
 
   const handleDeleteNote = (id: string) => {
     deleteNote(id);
-    setNotes(getNotes());
   };
 
   return (
